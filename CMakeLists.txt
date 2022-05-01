@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.23)
+
 project( hello )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL2/SDL2_win/include )
@@ -7,8 +9,7 @@ link_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL2/SDL2_win/lib/x64 )
 add_executable( hello main.cpp )
 target_link_libraries( hello SDL2 SDL2main )
 
-
-install( TARGETS hello DESTINATION bin )
+install( TARGETS hello RUNTIME DESTINATION app )
 
 set( CPACK_GENERATOR NSIS )
 set( CPACK_PACKAGE_NAME "Simple GUI CPP Program" )
