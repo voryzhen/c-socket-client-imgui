@@ -12,7 +12,7 @@ target_link_libraries( hello SDL2 SDL2main )
 install( TARGETS hello RUNTIME DESTINATION app )
 
 set( CPACK_GENERATOR NSIS )
-set( CPACK_PACKAGE_NAME "Simple GUI CPP Program" )
+set( CPACK_PACKAGE_NAME "SimpleGUICPPProgram" )
 set( CPACK_PACKAGE_VENDOR "CMake.org" )
 set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Simple GUI CPP Program" )
 
