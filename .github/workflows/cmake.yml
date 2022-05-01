@@ -59,4 +59,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./SimpleGUICPPProgram.exe
         asset_name: SimpleGUICPPProgram.exe
-        # asset_content_type: application/vnd.debian.binary-package
+        asset_content_type: application/vnd.windows.binary-package
