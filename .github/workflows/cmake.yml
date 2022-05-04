@@ -50,7 +50,7 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Build project # This would actually build your project, using zip for an example artifact
+    - name: Zip
       run: zip -r ./CmakeLists.txt result
 
     - name: Upload Release Asset
@@ -65,7 +65,7 @@ jobs:
         asset_content_type: application/vnd.windows.binary-package
 
     - name: Upload Archive Asset
-      id: upload-release-asset
+      id: upload-archive-asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
