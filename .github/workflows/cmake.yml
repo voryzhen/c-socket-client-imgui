@@ -50,10 +50,8 @@ jobs:
         draft: false
         prerelease: false
 
-    - uses: papeloto/action-zip@v1
-        with:
-          files: ./CmakeLists.txt
-          dest: result.zip
+    - name: Build project # This would actually build your project, using zip for an example artifact
+    - run: zip -r ./CmakeLists.txt result
 
     - name: Upload Release Asset
       id: upload-release-asset
