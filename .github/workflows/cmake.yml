@@ -51,7 +51,7 @@ jobs:
         prerelease: false
 
     - name: Zip
-      run: zip -r ./CmakeLists.txt result
+      run: 7z a result.zip ./CmakeLists.txt
 
     - name: Upload Release Asset
       id: upload-release-asset
