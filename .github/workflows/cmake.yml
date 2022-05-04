@@ -51,7 +51,7 @@ jobs:
         prerelease: false
 
     - name: Zip
-      run: 7z a result.zip ./CmakeLists.txt
+      run: 7z a result.zip ./build/Release/hello.exe ./vendor/SDL2/SDL2_win/lib/x64/SDL2.dll
 
     - name: Upload Release Asset
       id: upload-release-asset
