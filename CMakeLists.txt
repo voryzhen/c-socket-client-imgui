@@ -1,11 +1,18 @@
 cmake_minimum_required(VERSION 3.21.2)
 
-project( hello )
+project( rvchat )
 
-# ImGui Block
 set ( IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui )
+set ( SRC_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL2/SDL2_win/include ${IMGUI_DIR} ${IMGUI_DIR}/backends )
+include_directories(
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL2/SDL2_win/include
+    ${IMGUI_DIR}
+    ${IMGUI_DIR}/backends
+    ${SRC_DIR}/chat
+
+)
 
 link_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL2/SDL2_win/lib/x64 )
 
@@ -13,9 +20,11 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 
 add_executable(
 
-    hello
+    rvchat
 
-    main.cpp
+    src/main.cpp
+    src/chat/chat.cpp
+
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_demo.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
@@ -26,9 +35,9 @@ add_executable(
 
 )
 
-target_link_libraries( hello SDL2 SDL2main imm32 opengl32 gdi32 )
+target_link_libraries( rvchat SDL2 SDL2main imm32 opengl32 gdi32 )
 
-install( TARGETS hello RUNTIME DESTINATION app )
+install( TARGETS rvchat RUNTIME DESTINATION app )
 
 set( CPACK_GENERATOR NSIS )
 set( CPACK_PACKAGE_NAME "SimpleGUICPPProgram" )
