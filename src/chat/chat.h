@@ -13,6 +13,22 @@
 
 #include <string>
 
+#include "session_history.h"
+
+
+
+
+#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
+#include <iostream>
+#include <string>
+#pragma warning(disable: 4996)
+
+
+
+
+
+
 namespace rv_chat
 {
 
@@ -35,6 +51,10 @@ private:
     ImVec4 clear_color;
     bool done = false;
 
+    char server_addr_buf[20] = "";
+    char my_msg[256] = "";
+    std::string server_connect_status = "waiting to connection";
+
     const char* program_name = "RVChat";
 
     int init_sdl();
@@ -50,8 +70,24 @@ private:
     void handle_events();
     void prepare_windows();
     void create_sidebar();
+    void create_chat_history();
+    void create_msg_field();
 
     int run_chat();
+
+    // backend
+
+    WSAData wsaData;
+    SOCKADDR_IN addr;
+
+    int init_socet_lib();
+    int connect_to_server(std::string);
+
+public:
+
+    static SOCKET Connection;
+    static void ClientHandler();
+    void send_msg(std::string msg1);
 
 };
 

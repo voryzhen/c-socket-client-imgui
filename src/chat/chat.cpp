@@ -1,7 +1,10 @@
 #include "chat.h"
+//#include "chat_backend.h"
 
 namespace rv_chat
 {
+
+SOCKET rv_chat::RVChat::Connection;
 
 RVChat::RVChat()
 {
@@ -179,6 +182,8 @@ int RVChat::run_chat()
 
     set_program_main_state();
 
+    init_socet_lib();
+
     // Main loop
     while (!done)
     {
@@ -204,42 +209,79 @@ void RVChat::prepare_windows ()
 
     create_sidebar();
 
+    create_chat_history();
+
+    create_msg_field();
+
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    // if (show_demo_window)
+        // ImGui::ShowDemoWindow(&show_demo_window);
 
     // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-    {
-        static float f = 0.0f;
-        static int counter = 0;
+    // {
+        // static float f = 0.0f;
+        // static int counter = 0;
 
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        // ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
+        // ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+        // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+        // ImGui::Checkbox("Another Window", &show_another_window);
 
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-        if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
+        // if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            // counter++;
+        // ImGui::SameLine();
+        // ImGui::Text("counter = %d", counter);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
-    }
+        // ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        // ImGui::End();
+    // }
 
     // 3. Show another simple window.
-    if (show_another_window)
+    // if (show_another_window)
+    // {
+        // ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        // ImGui::Text("Hello from another window!");
+        // if (ImGui::Button("Close Me"))
+            // show_another_window = false;
+        // ImGui::End();
+    // }
+}
+
+void RVChat::create_chat_history()
+{
+    ImGui::SetNextWindowPos(ImVec2(440, 20), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(820, 540), ImGuiCond_Once );
+    ImGui::Begin("Chat History", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove );
+    ImGui::Text("Server status: %s", this_session_history.c_str());
+    ImGui::End();    
+}
+
+void RVChat::create_msg_field()
+{
+    ImGui::SetNextWindowPos(ImVec2(440, 580), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(820, 120), ImGuiCond_Once );
+    
+    ImGui::Begin("Message", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove );
+    
+    ImGui::InputText( "Enter Your Msg", my_msg, sizeof(my_msg) );
+    ImGui::SameLine();
+    if (ImGui::Button("Send"))
     {
-        ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me"))
-            show_another_window = false;
-        ImGui::End();
+        send_msg(std::string{my_msg});
     }
+    ImGui::End();       
+}
+
+void RVChat::send_msg(std::string msg1)
+{
+    std::cout << "Want to send: " << msg1 << std::endl;
+    int msg_size = (int)msg1.size();
+    send(rv_chat::RVChat::Connection, (char*)&msg_size, sizeof(int), NULL);
+    send(rv_chat::RVChat::Connection, msg1.c_str(), msg_size, NULL);
 }
 
 void RVChat::create_sidebar()
@@ -248,23 +290,85 @@ void RVChat::create_sidebar()
     ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Once);
     ImGui::SetNextWindowSize(ImVec2(400, 680), ImGuiCond_Once );
     
-    ImGui::Begin("Sidebar", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize );
+    ImGui::Begin("Sidebar", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove );
 
     int counter = 0;
 
-    char buf[20] = "";
-    ImGui::InputText( "ServerIP", buf, sizeof(buf) );
+    ImGui::InputText( "ServerIP", server_addr_buf, sizeof(server_addr_buf) );
 
     ImGui::SameLine();
     if (ImGui::Button("Connect"))
     {
-        counter++;
+        std::string addr{server_addr_buf};
+        int is_connected = connect_to_server(addr);
+        if (is_connected == 0)
+        {
+            server_connect_status = "connect";
+        }
+        else
+        {
+            server_connect_status = "some error";
+        }
     }
 
-    ImGui::Text("counter = %d", counter);
+    ImGui::Text("Server status: %s", server_connect_status.c_str());
 
     ImGui::End();
 
 }
+
+
+
+
+
+
+int RVChat::init_socet_lib()
+{
+    //WSAStartup
+    WORD DLLVersion = MAKEWORD(2, 1);
+    if(WSAStartup(DLLVersion, &wsaData) != 0) {
+        std::cout << "Error" << std::endl;
+        return -1;
+    }
+    return 0;
+}
+
+void RVChat::ClientHandler() {
+    int msg_size;
+    while(true) {
+        recv(rv_chat::RVChat::Connection, (char*)&msg_size, sizeof(int), NULL);
+        char *msg = new char[msg_size + 1];
+        msg[msg_size] = '\0';
+        recv(rv_chat::RVChat::Connection, msg, msg_size, NULL);
+        this_session_history += std::string{msg};
+        this_session_history += '\n';
+        this_session_history += '\n';
+        std::cout << msg << std::endl;
+        delete[] msg;
+    }
+}
+
+int RVChat::connect_to_server(std::string input_addr)
+{
+    int sizeofaddr = sizeof(addr);
+    // addr.sin_addr.s_addr = inet_addr("192.168.0.101");
+    addr.sin_addr.s_addr = inet_addr(input_addr.c_str());
+    addr.sin_port = htons(1111);
+    addr.sin_family = AF_INET;
+
+    rv_chat::RVChat::Connection = socket(AF_INET, SOCK_STREAM, NULL);
+    if(connect(rv_chat::RVChat::Connection, (SOCKADDR*)&addr, sizeof(addr)) != 0) {
+        std::cout << "Error: failed connect to server.\n";
+        return -1;
+    }
+    std::cout << "Connected!\n";
+    // startMyThread();
+    CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)(&RVChat::ClientHandler), NULL, NULL, NULL);
+    return 0;
+}
+
+
+
+
 
 };
