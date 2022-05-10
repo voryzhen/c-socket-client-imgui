@@ -51,7 +51,7 @@ jobs:
         prerelease: false
 
     - name: Zip
-      run: 7z a SimpleGUICPPProgram_Portable.zip ./build/Release/hello.exe ./vendor/SDL2/SDL2_win/lib/x64/SDL2.dll ./assets
+      run: 7z a SimpleGUICPPProgram_Portable.zip ./build/Release/rvchat.exe ./vendor/SDL2/SDL2_win/lib/x64/SDL2.dll ./assets
 
     - name: Upload Release Asset
       id: upload-release-asset
