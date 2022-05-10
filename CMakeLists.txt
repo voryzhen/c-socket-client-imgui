@@ -11,13 +11,12 @@ include_directories(
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
     ${SRC_DIR}/chat
-    #${SRC_DIR}/chat_backend
 
 )
 
 link_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL2/SDL2_win/lib/x64 )
 
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 
 add_executable(
 
@@ -25,7 +24,6 @@ add_executable(
 
     src/main.cpp
     src/chat/chat.cpp
-    #src/chat_backend/chat_backend.cpp
 
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_demo.cpp
